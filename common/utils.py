@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+import os
 from xpcs_viewer import XpcsFile as XF
 import skimage as skio
 import h5py
@@ -6,6 +8,7 @@ import glob
 import matplotlib.pyplot as plt
 from multiprocessing import Pool
 import logging
+
 
 
 logger = logging.getLogger(__name__)
@@ -30,8 +33,8 @@ def split(arr, n: int):
     return list(arr[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
 
 
-def read_keys_from_files_parallel(flist_list):
-    with Pool(24) as p:
+def read_keys_from_files_parallel(flist_list, num_cores=24):
+    with Pool(num_cores) as p:
         result = p.map(read_keys_from_files, flist_list)
         
     result = [x for x in result if x is not None]
@@ -59,6 +62,7 @@ def read_keys_from_files(flist, keys=('g2', 'g2_err', 'saxs_1d')):
             for k in keys:
                 data_dict[k].append(get_field(dset, k))
         except Exception:
+            logger.info(f'failed to read file {f}, skip this file')
             pass
     
     for k in keys:
@@ -163,16 +167,20 @@ def average_datasets_without_outlier(args):
     return avg_dict
 
 
-def average_datasets_without_outlier_parallel(args):
-    with Pool(24) as p:
+def average_datasets_without_outlier_parallel(args, num_cores=24):
+    with Pool(num_cores) as p:
         result = p.map(average_datasets_without_outlier, args)
     return result
 
 
 def get_temperature(fname, zone_idx=1):
     key = f'/measurement/sample/QNW_Zone{zone_idx}_Temperature'
-    with h5py.File(fname) as f:
-        val = f[key][()][0]
+    try:
+        with h5py.File(fname) as f:
+            val = float(f[key][()][0])
+    except Exception:
+        val = np.nan
+        logger.info(f'Failed to get temperature for file {fname}, return nan')
     return val
 
 
@@ -183,6 +191,53 @@ def read_temperature_from_files(fnames, zone_idx=1):
 def split(a, n):
     k, m = divmod(len(a), n)
     return list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+
+
+def process_group(group='B039',
+                  prefix='/data/xpcs8/2022-1/babnigg202203/cluster_results_reanalysis',
+                  num_sections=10,
+                  zone_idx=1,
+                  num_cores=24):
+    
+    # read file list in the folder
+    flist = glob.glob(os.path.join(prefix, f'{group}*.hdf'))
+    flist.sort()
+    logger.info(f'total number of files in {group}  is {len(flist)}')
+    
+    # get the temperature
+    temperature_list = read_temperature_from_files(flist, zone_idx=zone_idx)
+
+
+    
+    flist_sections = split(flist, num_sections)
+    idx_sections = split(np.arange(len(flist)), num_sections)
+    
+    # read main field for averag
+    data_dict_all = read_keys_from_files_parallel(flist_sections, num_cores=num_cores)
+    
+    # fig, ax = plt.subplots(1, 1)
+    # for n, sub_list in enumerate(idx_sections):
+    #     ax.plot(sub_list, temperature_list[sub_list], 'o', label=f'{n}')
+    # plt.legend()
+    
+    # do outlier removal and average
+    args = [(data_dict_all[n], f'{group}_section_{n:02d}') for n in range(num_sections)]
+    avg_all = average_datasets_without_outlier_parallel(args, num_cores=num_cores)
+    # mask = outlier_removal(data_dict, label=f'{group}_section_{n:02d}', percentile=5)
+    # avg_dict = average_datasets(data_dict=data_dict, mask=mask)
+    
+    
+    for n, avg_dict in enumerate(avg_all):
+        avg_dict['temperature'] = temperature_list[idx_sections[n]]
+        avg_dict['temperature_x'] = idx_sections[n]
+    
+    # get additonal field for plotting
+    axf = XF(flist[0])
+    t_el = axf.t_el
+    ql_dyn = axf.ql_dyn
+    ql_sta = axf.ql_sta
+    return avg_all, t_el, ql_dyn, ql_sta
+
 
 
 if __name__ == '__main__':
