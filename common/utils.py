@@ -173,8 +173,14 @@ def average_datasets_without_outlier_parallel(args, num_cores=24):
     return result
 
 
-def get_temperature(fname, zone_idx=1):
+def get_temperature(fname, zone_idx='auto'):
+    if zone_idx == 'auto':
+        zone_idx = (ord(os.path.basename(fname)[0]) - ord('A')) // 3 + 1
+        
+    assert 1 <= zone_idx <= 3, 'zone_idx must be in [1, 2, 3]'
+    
     key = f'/measurement/sample/QNW_Zone{zone_idx}_Temperature'
+        
     try:
         with h5py.File(fname) as f:
             val = float(f[key][()][0])
