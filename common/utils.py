@@ -155,8 +155,12 @@ def outlier_removal(data_dict, label='testrun', percentile=5):
     ax[-1].plot(mask_all, 'o')
     ax[-1].set_title('combined_axis')
     logger.info(f'{label=}: remove {np.sum(mask_all==False)} datasets out of {len(mask_all)}')
-    plt.tight_layout() 
-    plt.savefig(f'debug_{label}.png', dpi=300)
+    plt.tight_layout()
+    
+    if not os.path.isdir('debug'):
+        os.mkdir('debug')
+        
+    plt.savefig(f'debug/debug_outlier_{label}.png', dpi=300)
     plt.close(fig)
     return mask_all
 
