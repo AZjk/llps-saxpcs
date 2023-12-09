@@ -92,15 +92,18 @@ def average_datasets(flist=None, data_dict=None, mask=None):
 
     norm_factor = {}
     for k in keys:
-        average_dict[k] = np.nansum(data_dict[k][mask], axis=0)
-        temp = np.sum(np.isnan(data_dict[k][mask]), axis=0)
-        norm_factor[k] = np.ones_like(temp) * num_valid_files - temp
+        if k != 'g2_err':
+            average_dict[k] = np.nanmean(data_dict[k][mask], axis=0)
+        else:
+            # average_dict[k] = np.sqrt(np.nanmean(data_dict[k][mask] ** 2, axis=0)) * np.nanmean(data_dict['g2'][mask], axis=0)
+            average_dict[k] = np.sqrt(np.nansum(data_dict[k][mask] ** 2, axis=0))
+            average_dict[k] /= np.sum(~np.isnan(data_dict[k][mask]), axis=0)
+        # temp = np.sum(np.isnan(data_dict[k][mask]), axis=0)
+        # norm_factor[k] = np.ones_like(temp) * num_valid_files - temp
 
-    for n, key in enumerate(keys):
-        factor = norm_factor[key]
-        if key == 'g2_err':
-            factor = np.sqrt(factor)
-        average_dict[key] /= factor
+    # for n, key in enumerate(keys):
+    #     factor = norm_factor[key]
+    #     average_dict[key] /= factor
         
     return average_dict
 
