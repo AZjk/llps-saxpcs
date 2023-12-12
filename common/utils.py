@@ -220,8 +220,17 @@ def process_group(group='B039',
     # get the temperature
     temperature_list = read_temperature_from_files(flist, zone_idx=zone_idx)
 
-
-    
+    if num_sections <= 0:
+        keys=('g2', 'g2_err', 'saxs_1d')
+        data_dict = read_keys_from_files(flist, keys=keys)
+        axf = XF(flist[0])
+        t_el = axf.t_el
+        ql_dyn = axf.ql_dyn
+        ql_sta = axf.ql_sta
+        data_dict['temperature'] = temperature_list
+        
+        return data_dict, t_el, ql_dyn, ql_sta
+        
     flist_sections = split(flist, num_sections)
     idx_sections = split(np.arange(len(flist)), num_sections)
     
