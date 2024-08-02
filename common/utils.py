@@ -206,11 +206,6 @@ def read_temperature_from_files(fnames, zone_idx=1):
     return np.array([get_temperature(f, zone_idx) for f in fnames])
 
 
-def split(a, n):
-    k, m = divmod(len(a), n)
-    return list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
-
-
 def process_group(group='B039',
                   prefix='/data/xpcs8/2022-1/babnigg202203/cluster_results_reanalysis',
                   num_sections=10,
