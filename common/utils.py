@@ -14,23 +14,24 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def split(arr, n: int):
+def split(arr, n_segments: int):
     """split arr into n parts
 
     Parameters
     ----------
     arr : list
         input part
-    n : int 
-        number of parts
+    n_segments : int 
+        number of segments
 
     Returns
     -------
     list
-        a list of n lists
+        a list of n_segments lists
     """
-    k, m = divmod(len(arr), n)
-    return list(arr[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+    k, m = divmod(len(arr), n_segments)
+    return list(arr[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] 
+                for i in range(n_segments))
 
 
 def read_keys_from_files_parallel(flist_list, num_cores=24):
@@ -72,7 +73,6 @@ def read_keys_from_files(flist, keys=('g2', 'g2_err', 'saxs_1d')):
 
 
 def average_datasets(flist=None, data_dict=None, mask=None):
-
     if data_dict is None and flist is not None:
         keys=('g2', 'g2_err', 'saxs_1d')
         data_dict = read_keys_from_files(flist)
@@ -90,20 +90,12 @@ def average_datasets(flist=None, data_dict=None, mask=None):
     else:
         num_valid_files = np.sum(mask)
 
-    norm_factor = {}
     for k in keys:
         if k != 'g2_err':
             average_dict[k] = np.nanmean(data_dict[k][mask], axis=0)
         else:
-            # average_dict[k] = np.sqrt(np.nanmean(data_dict[k][mask] ** 2, axis=0)) * np.nanmean(data_dict['g2'][mask], axis=0)
             average_dict[k] = np.sqrt(np.nansum(data_dict[k][mask] ** 2, axis=0))
             average_dict[k] /= np.sum(~np.isnan(data_dict[k][mask]), axis=0)
-        # temp = np.sum(np.isnan(data_dict[k][mask]), axis=0)
-        # norm_factor[k] = np.ones_like(temp) * num_valid_files - temp
-
-    # for n, key in enumerate(keys):
-    #     factor = norm_factor[key]
-    #     average_dict[key] /= factor
         
     return average_dict
 
@@ -210,12 +202,22 @@ def process_group(group='B039',
                   prefix='/data/xpcs8/2022-1/babnigg202203/cluster_results_reanalysis',
                   num_sections=10,
                   zone_idx=1,
-                  num_cores=24):
+                  num_cores=24,
+                  skip_first_files=0,
+                  skip_last_files=0):
     
     # read file list in the folder
     flist = glob.glob(os.path.join(prefix, f'{group}*.hdf'))
     flist.sort()
+    assert len(flist) > 0, f'no dataset is found in {prefix}'
+
     logger.info(f'total number of files in {group}  is {len(flist)}')
+
+    logger.info(f'{skip_first_files=}, {skip_last_files=}')
+
+    skip_end = len(flist) - skip_last_files
+    flist = flist[skip_first_files: skip_end]
+    assert len(flist) > 0, 'no dataset after the skip filter'
     
     # get the temperature
     temperature_list = read_temperature_from_files(flist, zone_idx=zone_idx)
@@ -233,7 +235,11 @@ def process_group(group='B039',
         
     flist_sections = split(flist, num_sections)
     idx_sections = split(np.arange(len(flist)), num_sections)
-    
+    print('index\t T-min(C)\t T-max(C)\t T-mean(C)\t points')
+    for n in range(num_sections):
+        temp = temperature_list[idx_sections[n]]
+        print(f'{n=:02d}\t {round(np.min(temp), 4):8}\t {round(np.max(temp), 4):8}\t {round(np.mean(temp), 4):8}\t {len(idx_sections[n])}')
+
     # read main field for averag
     data_dict_all = read_keys_from_files_parallel(flist_sections, num_cores=num_cores)
     
@@ -261,14 +267,19 @@ def process_group(group='B039',
     return avg_all, t_el, ql_dyn, ql_sta
 
 
-
 if __name__ == '__main__':
-    flist = glob.glob('/home/8ididata/2021-2/babnigg202107_2/cluster_results_QZ/B039*')[0:100]
-    # print(read_keys_from_files(flist))
-    # print(read_temperature_from_files(flist))
-    data_dict = read_keys_from_files(flist)
-    print(data_dict.keys())
-    # print(data_dict['g2'].shape)
-    mask = outlier_removal(data_dict)
-    print(np.sum(mask))
-    res = average_datasets(data_dict=data_dict, mask=mask)
+    # test 01
+    # flist = glob.glob('/home/8ididata/2021-2/babnigg202107_2/cluster_results_QZ/B039*')[0:100]
+    # # print(read_keys_from_files(flist))
+    # # print(read_temperature_from_files(flist))
+    # data_dict = read_keys_from_files(flist)
+    # print(data_dict.keys())
+    # # print(data_dict['g2'].shape)
+    # mask = outlier_removal(data_dict)
+    # print(np.sum(mask))
+    # res = average_datasets(data_dict=data_dict, mask=mask)
+
+    # test 02
+    a, b, c, d = process_group(group='B039', prefix='/home/8ididata/2021-2/babnigg202107_2/cluster_results_QZ',
+                  skip_first_files=0, skip_last_files=30)
+    print(a[0]['saxs_1d'])
