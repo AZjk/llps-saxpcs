@@ -138,11 +138,15 @@ def apply_cross_corr_threshold(x0, percentile=5, style='linear', debug_fig_ax=No
     return mask
 
 
-def outlier_removal(data_dict, label='testrun', percentile=5):
-    mask_all = np.ones_like(len(data_dict['g2']), dtype=bool)
+def outlier_removal(data_dict, label='testrun', percentile=5, plot_debug=False):
+    mask_all = np.ones(len(data_dict['g2']), dtype=bool)
     num_features = len(data_dict.keys()) + 1
-    fig, ax = plt.subplots(num_features, 1, figsize=(4, 2.4 * num_features),
-                           sharex=True)
+
+    if plot_debug:
+        fig, ax = plt.subplots(num_features, 1, figsize=(4, 2.4 * num_features),
+                               sharex=True)
+    else:
+        ax = [None for _ in range(num_features)]
 
     for n, key in enumerate(data_dict.keys()):
         if key == 'saxs_1d':
@@ -154,17 +158,18 @@ def outlier_removal(data_dict, label='testrun', percentile=5):
                                           label=key, percentile=percentile)
 
         mask_all = np.logical_and(mask_all, mask)
-
-    ax[-1].plot(mask_all, 'o')
-    ax[-1].set_title('combined_axis')
     logger.info(f'{label=}: remove {np.sum(mask_all==False)} datasets out of {len(mask_all)}')
-    plt.tight_layout()
+
+    if plot_debug:
+        ax[-1].plot(mask_all, 'o')
+        ax[-1].set_title('combined_axis')
+        plt.tight_layout()
     
-    if not os.path.isdir('debug'):
-        os.mkdir('debug')
-        
-    plt.savefig(f'debug/debug_outlier_{label}.png', dpi=300)
-    plt.close(fig)
+        if not os.path.isdir('debug'):
+            os.mkdir('debug')
+        plt.savefig(f'debug/debug_outlier_{label}.png', dpi=300)
+        plt.close(fig)
+
     return mask_all
 
 
@@ -267,6 +272,8 @@ if __name__ == '__main__':
     # print(read_keys_from_files(flist))
     # print(read_temperature_from_files(flist))
     data_dict = read_keys_from_files(flist)
+    print(data_dict.keys())
+    # print(data_dict['g2'].shape)
     mask = outlier_removal(data_dict)
     print(np.sum(mask))
-    average_datasets(data_dict=data_dict, mask=mask)
+    res = average_datasets(data_dict=data_dict, mask=mask)
