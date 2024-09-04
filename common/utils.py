@@ -35,6 +35,9 @@ def split(arr, n_segments: int):
 
 
 def read_keys_from_files_parallel(flist_list, num_cores=24):
+    """
+    Read keys from a list of files and process them in parallel
+    """  
     with Pool(num_cores) as p:
         result = p.map(read_keys_from_files, flist_list)
         
@@ -43,6 +46,32 @@ def read_keys_from_files_parallel(flist_list, num_cores=24):
 
     
 def read_keys_from_files(flist, keys=('g2', 'g2_err', 'saxs_1d')):
+    """
+    This module provides functionalities to read, process, and analyze XPCS (X-ray Photon Correlation Spectroscopy) datasets. 
+    It supports parallel reading of data files, splitting arrays into n-segments, averaging datasets, applying cross-correlation thresholds,
+    and removing outliers based on correlation matrices.
+
+    Functions
+    ---------
+    - split(arr, n_segments)
+        Splits an array into specified number of segments.
+
+    - read_keys_from_files_parallel(flist_list, num_cores)
+        Reads keys from a list of files and processes them in parallel.
+
+    - read_keys_from_files(flist, keys)
+        Reads specific keys from a list of files.
+
+    - average_datasets(flist, data_dict, mask)
+        Averages datasets from a list of files or a dictionary with pre-read data.
+
+    - apply_cross_corr_threshold(x0, percentile, style, debug_fig_ax, label)
+        Applies a cross-correlation threshold to data using the specified percentile as the cutoff value.
+
+    - outlier_removal(data_dict, label, percentile, plot_debug)
+        Removes outliers from the data dictionary based on the correlation matrix.
+    """
+
     def get_field(xf_obj, key):
         if key == 'saxs_1d':
             x = xf_obj.saxs_1d['Iq']
@@ -131,8 +160,52 @@ def apply_cross_corr_threshold(x0, percentile=5, style='linear', debug_fig_ax=No
 
 
 def outlier_removal(data_dict, label='testrun', percentile=5, plot_debug=False):
+    """
+    Remove outliers from the data dictionary based on the correlation matrix.
+    """
     mask_all = np.ones(len(data_dict['g2']), dtype=bool)
     num_features = len(data_dict.keys()) + 1
+    """
+    This module supports various data processing operations related to segmenting, reading, averaging, and filtering datasets.
+
+    It supports parallel reading of data files, splitting arrays into n-segments, averaging datasets, applying cross-correlation thresholds,
+    and removing outliers based on correlation matrices.
+
+    Functions
+    ---------
+    - split(arr, n_segments)
+        Splits an array into the specified number of segments.
+
+    - read_keys_from_files_parallel(flist_list, num_cores)
+        Reads keys from a list of files and processes them in parallel.
+
+    - read_keys_from_files(flist, keys)
+        Reads specific keys from a list of files.
+
+    - average_datasets(flist, data_dict, mask)
+        Averages datasets from a list of files or a dictionary with pre-read data.
+
+    - apply_cross_corr_threshold(x0, percentile, style, debug_fig_ax, label)
+        Applies a cross-correlation threshold to data using the specified percentile as the cutoff value.
+
+    - outlier_removal(data_dict, label, percentile, plot_debug)
+        Removes outliers from the data dictionary based on the correlation matrix.
+
+    - average_datasets_without_outlier(args)
+        Averages datasets after outlier removal.
+
+    - average_datasets_without_outlier_parallel(args, num_cores)
+        Averages datasets after outlier removal in parallel usage.
+
+    - get_temperature(fname, zone_idx)
+        Extracts temperature information from given file.
+
+    - read_temperature_from_files(fnames, zone_idx)
+        Reads temperature information from list of files.
+
+    - process_group(group, prefix, num_sections, zone_idx, num_cores, skip_first_files, skip_last_files)
+        Processes data group by reading file list, extracting temperatures, and optionally segmenting data and averaging datasets.
+    """
 
     if plot_debug:
         fig, ax = plt.subplots(num_features, 1, figsize=(4, 2.4 * num_features),
@@ -166,6 +239,9 @@ def outlier_removal(data_dict, label='testrun', percentile=5, plot_debug=False):
 
 
 def average_datasets_without_outlier(args):
+    """
+    Average datasets without outlier.
+    """
     mask = outlier_removal(args[0], label=args[1], percentile=5)
     avg_dict = average_datasets(data_dict=args[0], mask=mask)
     return avg_dict
@@ -205,6 +281,7 @@ def process_group(group='B039',
                   num_cores=24,
                   skip_first_files=0,
                   skip_last_files=0):
+    
     
     # read file list in the folder
     flist = glob.glob(os.path.join(prefix, f'{group}*.hdf'))
@@ -283,3 +360,4 @@ if __name__ == '__main__':
     a, b, c, d = process_group(group='B039', prefix='/home/8ididata/2021-2/babnigg202107_2/cluster_results_QZ',
                   skip_first_files=0, skip_last_files=30)
     print(a[0]['saxs_1d'])
+    exit(0)
