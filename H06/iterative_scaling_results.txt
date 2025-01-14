@@ -1,0 +1,8 @@
+Curve 1: q_scale=1.0600, i_scale=0.8870, chi2=0.0001
+Curve 2: q_scale=1.1300, i_scale=0.7650, chi2=0.0001
+Curve 3: q_scale=1.2600, i_scale=0.6340, chi2=0.0001
+Curve 4: q_scale=1.4500, i_scale=0.5000, chi2=0.0001
+Curve 5: q_scale=1.9800, i_scale=0.2970, chi2=0.0001
+Curve 6: q_scale=3.4300, i_scale=0.1050, chi2=0.0000
+Curve 7: q_scale=6.1300, i_scale=0.0170, chi2=0.0002
+Curve 8: q_scale=10.1800, i_scale=0.0020, chi2=0.0004
