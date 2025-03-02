@@ -173,3 +173,15 @@ def optimize_T0_log(temperatures, x_values, x_errors, initial_delta=1.0, num_sam
     T0_samples = np.array(T0_samples)
     T0_err = np.std(T0_samples)
     return best_T0, T0_err
+
+
+# lorentzian fit where b is fixed
+def lorentzian_fit_fix_b(Iq0, xi, q):
+    b = 1.7815  # fixed exponent
+    return Iq0 / (1 + (xi * q)**b)
+
+
+# lorentzian fit with b
+def lorentzian_fit(q, Iq0, xi, b):
+    b = 1.7815
+    return Iq0 / (1 + (xi * q)**b)
