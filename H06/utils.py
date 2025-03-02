@@ -176,7 +176,7 @@ def optimize_T0_log(temperatures, x_values, x_errors, initial_delta=1.0, num_sam
 
 
 # lorentzian fit where b is fixed
-def lorentzian_fit_fix_b(Iq0, xi, q):
+def lorentzian_fit_fix_b(q, Iq0, xi):
     b = 1.7815  # fixed exponent
     return Iq0 / (1 + (xi * q)**b)
 
