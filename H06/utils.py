@@ -183,5 +183,4 @@ def lorentzian_fit_fix_b(q, Iq0, xi):
 
 # lorentzian fit with b
 def lorentzian_fit(q, Iq0, xi, b):
-    b = 1.7815
     return Iq0 / (1 + (xi * q)**b)
