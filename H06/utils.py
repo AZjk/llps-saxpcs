@@ -5,7 +5,6 @@ List of functions used to process the SAXS data for sample H06 during heating ra
 import numpy as np
 from scipy.optimize import minimize
 
-
 def preprocess_data(avg_data_list, ql_sta):
     """
     Preprocess the data to remove non-positive values from q and I.
@@ -25,7 +24,7 @@ def preprocess_data(avg_data_list, ql_sta):
 
         if len(cleaned_q) > 0 and len(cleaned_i) > 0:
             cleaned_ql_sta.append(cleaned_q)
-            cleaned_data_list.append({'saxs_1d': cleaned_i})
+            cleaned_data_list.append(cleaned_i)
 
     return cleaned_data_list, cleaned_ql_sta
 
@@ -58,16 +57,26 @@ def iterative_scaling(avg_data_list, ql_sta_cleaned):
     """
     Iteratively scale each curve in the dataset, using the previously scaled curve as the reference.
     Dynamically adjust the q_scale range based on the curve index.
+    Also estimates error in q_scale using sensitivity analysis.
     """
     ref_x = ql_sta_cleaned[0]
-    ref_y = avg_data_list[0]['saxs_1d']
+    ref_y = avg_data_list[0]  # Changed to get the array directly
+    
+    num_sets = len(avg_data_list)
+    num_q = len(ref_x)
 
-    scaling_results = []
-    scaled_curves = []
-
+    scaling_results = np.zeros([num_sets, 5])  # Now stores q_scale_error as well
+    scaled_curves = np.zeros([num_sets, 2, num_q])
+    
+    scaling_results[0,1] = 1
+    scaling_results[0,2] = 1
+    scaling_results[0,3] = 0 #Initialize error to 0 for the first curve.
+    scaled_curves[0,0,:] = ref_x
+    scaled_curves[0,1,:] = ref_y
+    
     for i in range(1, len(avg_data_list)):  # Start from the second curve
         target_x = ql_sta_cleaned[i]
-        target_y = avg_data_list[i]['saxs_1d']
+        target_y = avg_data_list[i] # Changed to get the array directly
 
         # Set dynamic q_scale range based on curve index
         if i <= 4:  # Curves 1–4
@@ -90,17 +99,60 @@ def iterative_scaling(avg_data_list, ql_sta_cleaned):
                 chi2_results.append((q_scale, i_scale, chi2))
 
         best_q_scale, best_i_scale, min_chi2 = min(chi2_results, key=lambda x: x[2])
-        scaling_results.append((i, best_q_scale, best_i_scale, min_chi2))
+        
+        # Estimate error in q_scale using sensitivity analysis
+        q_scale_error = estimate_q_scale_error(ref_x, ref_y, target_x, target_y, best_q_scale, best_i_scale)
 
+        scaling_results[i,:] = [i, best_q_scale, best_i_scale, min_chi2, q_scale_error] #Store the error
         scaled_x = target_x * best_q_scale
         scaled_y = target_y * best_i_scale
-        scaled_curves.append((scaled_x, scaled_y))
-
+        scaled_curves[i,0,:] = scaled_x
+        scaled_curves[i,1,:] = scaled_y
+        
         ref_x = scaled_x
         ref_y = scaled_y
 
     return scaling_results, scaled_curves
 
+
+
+def estimate_q_scale_error(ref_x, ref_y, target_x, target_y, best_q_scale, best_i_scale, delta_q_scale=0.01):
+    """
+    Estimate the error in q_scale by calculating how much the chi2 changes when q_scale is perturbed.
+
+    Parameters:
+    -----------
+    ref_x, ref_y: numpy.ndarray
+        Reference curve q and intensity.
+    target_x, target_y: numpy.ndarray
+        Target curve q and intensity.
+    best_q_scale: float
+        The q_scale value that minimizes chi2.
+    best_i_scale: float
+        The i_scale value that minimizes chi2.
+    delta_q_scale: float, optional
+        The perturbation in q_scale to use for the sensitivity analysis.  Default is 0.01.
+
+    Returns:
+    -----------
+    float
+        An estimate of the error in q_scale.
+    """
+    # Calculate chi2 at the best q_scale
+    chi2_min = chi_squared_direct(best_q_scale, best_i_scale, ref_x, ref_y, target_x, target_y)
+    
+    # Calculate chi2 at slightly perturbed q_scales
+    chi2_plus = chi_squared_direct(best_q_scale + delta_q_scale, best_i_scale, ref_x, ref_y, target_x, target_y)
+    chi2_minus = chi_squared_direct(best_q_scale - delta_q_scale, best_i_scale, ref_x, ref_y, target_x, target_y)
+    
+    # Use a simple approximation for the error (you could use a more sophisticated approach)
+    # The error is related to the curvature of the chi2 function around the minimum
+    error_q_scale = np.abs((chi2_plus - chi2_minus)) / (2 * delta_q_scale) # Simplified error calculation
+    # Note: given the error is calculated from the curvature of chi2 upon linear perturbation of q_scale,
+    # there is no need to propagate q_scale error from log to linear,
+    # but it is necessary to point out what chi2 is used (the chi2 from log of q and intensity)
+    
+    return error_q_scale
 
 def normalize_scaled_curves(scaled_curves):
     """
