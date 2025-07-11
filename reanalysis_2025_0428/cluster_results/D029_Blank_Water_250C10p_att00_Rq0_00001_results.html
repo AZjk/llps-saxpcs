@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      margin: 0px;
+      margin-top: 0px;
+      padding: 0px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    nav {
+      display: flex;
+      position: static;
+      top: 0;
+      width: 100%;
+      background-color: rgb(133, 244, 116);
+      overflow: auto;
+      height: auto;
+      opacity: 0.618;
+    }
+
+    .left-links {
+      flex: 1 1 200px;
+    }
+
+    .links {
+      display: inline-block;
+      text-align: center;
+      padding: 14px;
+      color: #000000;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: bolder;
+    }
+
+    .links:hover {
+      border-bottom: 2px solid purple;
+    }
+
+    .selected {
+      border-bottom: 2px solid purple;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 8px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2
+    }
+
+    th {
+      background-color: #da8bc1;
+      color: white;
+      font-size: 18px
+    }
+
+  </style>
+
+  <head>
+
+
+  <body>
+    <nav>
+      <div class="left-links">
+        <a class="links" href="#"> D029_Blank_Water_250C10p_att00_Rq0_00001_results</a>
+      </div>
+      <div class="right-links">
+        <a class="links" href="#scattering">Scattering</a>
+        <a class="links" href="#stability">Stability</a>
+        <a class="links" href="#correlation-g2">Correlation-g2</a>
+        <a class="links" href="#correlation-c2">Correlation-c2</a>
+        <a class="links" href="#metadata">Metadata</a>
+      </div>
+    </nav>
+
+
+    <div id="scattering">
+      <img id="D029_Blank_Water_250C10p_att00_Rq0_00001_results/saxs_mask.png" src="D029_Blank_Water_250C10p_att00_Rq0_00001_results/saxs_mask.png" width="100%" height="auto">
+    </div>
+
+    <div id="stability">
+      <img id="D029_Blank_Water_250C10p_att00_Rq0_00001_results/stability.png" src="D029_Blank_Water_250C10p_att00_Rq0_00001_results/stability.png" width="100%" height="auto">
+    </div>
+
+   <div id="correlation-g2">
+     
+     <img id="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0000.png" src="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0000.png" width="100%" height="auto">
+     
+     <img id="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0001.png" src="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0001.png" width="100%" height="auto">
+     
+     <img id="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0002.png" src="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0002.png" width="100%" height="auto">
+     
+     <img id="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0003.png" src="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0003.png" width="100%" height="auto">
+     
+     <img id="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0004.png" src="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0004.png" width="100%" height="auto">
+     
+     <img id="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0005.png" src="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0005.png" width="100%" height="auto">
+     
+     <img id="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0006.png" src="D029_Blank_Water_250C10p_att00_Rq0_00001_results/g2_0006.png" width="100%" height="auto">
+     
+     </div>
+    
+
+   <div id="correlation-c2">
+     
+     </div>
+
+    <div id="metadata" class="styled-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>/entry/instrument</td>
+            <td>
+                
+                <table>
+                  
+                  <tr>
+                    <td><b>attenuator_1</b></td>
+                    <td>{'attenuator_index': np.int64(0), 'attenuator_transmission': np.float64(1.0)}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>attenuator_2</b></td>
+                    <td>{'attenuator_index': np.int64(0), 'attenuator_transmission': np.float64(1.0)}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>beam_stop</b></td>
+                    <td>{'size': np.float64(1.0), 'x_position': np.float64(1.0), 'y_position': np.float64(1.0)}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>bluesky</b></td>
+                    <td>{'bluesky_plan': 'mesh_scan', 'bluesky_plan_kwargs': 'mesh_scan_sample_kwargs', 'bluesky_version': '1.0.0', 'parent_folder': '/gdata/dm/8IDI/2025-1/qzhang202503/data/', 'scan_id': np.int64(1), 'spec_file': 'qzhang202503.dat'}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>datamanagement</b></td>
+                    <td>{'workflow_kwargs': '{"key": "value"}', 'workflow_name': 'boost_corr workflow', 'workflow_version': '0.0.1'}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>detector_1</b></td>
+                    <td>{'beam_center_position_x': np.float64(1677.5), 'beam_center_position_y': np.float64(841.5), 'beam_center_x': np.float64(1677.5), 'beam_center_y': np.float64(841.5), 'compression': 'bslz4', 'count_time': np.float64(2e-05), 'detector_name': 'rigaku3M', 'distance': np.float64(9.03001335), 'frame_time': array([[2.e-05]], dtype=float32), 'position_x': np.float64(-229.99998299999993), 'position_y': np.float64(169.999991), 'rotation_x': np.float64(0.0), 'rotation_y': np.float64(0.0), 'rotation_z': np.float64(0.0), 'x_pixel_size': np.float64(7.5e-05), 'y_pixel_size': np.float64(7.5e-05)}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>incident_beam</b></td>
+                    <td>{'extent': np.float64(1e-06), 'incident_beam_intensity': np.float64(133.49012809232), 'incident_energy': np.float64(12.339109324708671), 'incident_energy_spread': np.float64(0.0001), 'incident_polarization_type': 'linear_horizontal', 'ring_current': np.float64(0.0), 'transmitted_beam_intensity': np.float64(0.0001)}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>monochromator</b></td>
+                    <td>{'energy': np.float64(1.0), 'wavelength': np.float64(1.0)}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>slits_1</b></td>
+                    <td>{'horizontal_center': np.float64(0.0), 'horizontal_gap': np.float64(1.0), 'vertical_center': np.float64(0.0), 'vertical_gap': np.float64(1.0)}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>undulator_1</b></td>
+                    <td>{'energy': np.float64(1.0), 'gap': np.float64(1.0)}</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>undulator_2</b></td>
+                    <td>{'energy': np.float64(1.0), 'gap': np.float64(1.0)}</td>
+                  </tr>
+                  
+                </table>
+              
+            </td>
+          </tr>
+          
+          <tr>
+            <td>/xpcs/multitau/config</td>
+            <td>
+                
+                <table>
+                  
+                  <tr>
+                    <td><b>analysis_type</b></td>
+                    <td>multitau</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>avg_frame</b></td>
+                    <td>1</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>begin_frame</b></td>
+                    <td>0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>end_frame</b></td>
+                    <td>-1</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>gpu_id</b></td>
+                    <td>0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>output</b></td>
+                    <td>cluster_results</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>overwrite</b></td>
+                    <td>False</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>qmap</b></td>
+                    <td>/home/beams10/8IDIUSER/Documents/llps-saxpcs/reanalysis_2025_0428/202107_2_qmap.hdf</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>raw</b></td>
+                    <td>/gdata/s8id-dmdtn//2021-2/babnigg202107_2_nexus/D029_Blank_Water_250C10p_att00_Rq0/D029_Blank_Water_250C10p_att00_Rq0_00001/D029_Blank_Water_250C10p_att00_Rq0_00001.bin</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>save_G2</b></td>
+                    <td>False</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>smooth</b></td>
+                    <td>sqmap</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>stride_frame</b></td>
+                    <td>1</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>verbose</b></td>
+                    <td>True</td>
+                  </tr>
+                  
+                </table>
+              
+            </td>
+          </tr>
+          
+          <tr>
+            <td>/entry/sample</td>
+            <td>
+                
+                <table>
+                  
+                  <tr>
+                    <td><b>full_description</b></td>
+                    <td>Full sample description</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>position_rheo_x</b></td>
+                    <td>0.0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>position_rheo_y</b></td>
+                    <td>0.0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>position_rheo_z</b></td>
+                    <td>0.0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>position_x</b></td>
+                    <td>230.96111267089847</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>position_y</b></td>
+                    <td>20.788890991210938</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>position_z</b></td>
+                    <td>-0.0282501220703125</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>qnw1_temperature</b></td>
+                    <td>[[20.]]</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>qnw1_temperature_set</b></td>
+                    <td>25.0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>qnw2_temperature</b></td>
+                    <td>[[25.]]</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>qnw2_temperature_set</b></td>
+                    <td>25.0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>qnw3_temperature</b></td>
+                    <td>[[26.01]]</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>qnw3_temperature_set</b></td>
+                    <td>25.0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>qnw_lakeshore</b></td>
+                    <td>300.245</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>rheometer_shear_rate</b></td>
+                    <td>1.0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>rheometer_temperature</b></td>
+                    <td>1.0</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>short_description</b></td>
+                    <td>Short sample description</td>
+                  </tr>
+                  
+                </table>
+              
+            </td>
+          </tr>
+          
+          <tr>
+            <td>/entry/user</td>
+            <td>
+                
+                <table>
+                  
+                  <tr>
+                    <td><b>cycle</b></td>
+                    <td>2025-1</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>email</b></td>
+                    <td>JohnDoe@mail.edu</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>institution</b></td>
+                    <td>Institution Name</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>name</b></td>
+                    <td>John Doe</td>
+                  </tr>
+                  
+                  <tr>
+                    <td><b>proposal_id</b></td>
+                    <td>none</td>
+                  </tr>
+                  
+                </table>
+              
+            </td>
+          </tr>
+          
+          <tr>
+            <td>analysis_type</td>
+            <td>
+              
+                ('Multitau',)
+              
+            </td>
+          </tr>
+          
+          <tr>
+            <td>start_time</td>
+            <td>
+              
+                2025-03-25 20:34:10.944602
+              
+            </td>
+          </tr>
+          
+          <tr>
+            <td>plot_time</td>
+            <td>
+              
+                2025-05-15 17:11:13
+              
+            </td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+
+  </body>
+</html>

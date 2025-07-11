@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>File Table</title>
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 8px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #ffff99;
+    }
+
+    th {
+      background-color: #1bc0dd;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    
+    th.sortable:hover {
+      background-color: #179bb5;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="styled-table">
+    <table id="filetable">
+      <thead>
+        <tr>
+          <th> Filename </th>
+          <th> Analysis Type </th>
+          <th class="sortable" onclick="sortTable(2)"> Start Time ⬍ </th>
+          <th class="sortable" onclick="sortTable(3)"> Plot Time ⬍ </th>
+        </tr>
+        <tr>
+          <td>
+            <input type="text" class="filter-input" data-column="0" placeholder="Search for filename.." size="50">
+          </td>
+          <td>
+            <input type="text" class="filter-input" data-column="1" placeholder="Search for type..">
+          </td>
+          <td colspan="2">Click column headers to sort</td>
+        </tr>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Filtering Functionality
+    document.querySelectorAll(".filter-input").forEach(input => {
+      input.addEventListener("input", function() {
+        let column = this.dataset.column;
+        let filterValue = this.value.toUpperCase();
+        let rows = document.querySelectorAll("#filetable tbody tr");
+
+        rows.forEach(row => {
+          let cell = row.cells[column];
+          if (cell) {
+            let cellText = cell.textContent || cell.innerText;
+            row.style.display = cellText.toUpperCase().includes(filterValue) ? "" : "none";
+          }
+        });
+      });
+    });
+
+    // Sorting Functionality
+    function sortTable(colIndex) {
+      let table = document.getElementById("filetable");
+      let rows = Array.from(table.rows).slice(2); // Exclude headers
+      let isAscending = table.getAttribute("data-sort") !== colIndex.toString();
+
+      rows.sort((rowA, rowB) => {
+        let a = rowA.cells[colIndex].getAttribute("data-timestamp") || rowA.cells[colIndex].innerText;
+        let b = rowB.cells[colIndex].getAttribute("data-timestamp") || rowB.cells[colIndex].innerText;
+
+        // Convert to date for proper sorting
+        let dateA = new Date(a).getTime();
+        let dateB = new Date(b).getTime();
+
+        return isAscending ? dateA - dateB : dateB - dateA;
+      });
+
+      rows.forEach(row => table.appendChild(row)); // Reorder rows
+
+      table.setAttribute("data-sort", isAscending ? colIndex.toString() : "");
+    }
+  </script>
+
+</body>
+
+</html>

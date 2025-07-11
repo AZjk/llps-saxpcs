@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 import os
-from xpcs_viewer import XpcsFile as XF
+from pyxpcsviewer import XpcsFile as XF
 import skimage as skio
 import h5py
 import glob
@@ -77,10 +77,15 @@ def read_keys_from_files(flist, keys=('g2', 'g2_err', 'saxs_1d')):
             x = xf_obj.saxs_1d['Iq']
             assert x.ndim in [1, 2]
             if x.ndim == 2:
-                x = np.nanmean(x, axis=0)
+                try:
+                    # print(np.sum(~np.isnan(x)))
+                    x = np.nanmean(x, axis=0)
+                except:
+                    print(xf_obj.saxs_1d['Iq'])
+                    raise
                 return x
         else:
-            return xf_obj.at(key)
+            return getattr(xf_obj, key)
 
     data_dict = {}
     for key in keys:
@@ -259,7 +264,8 @@ def get_temperature(fname, zone_idx='auto'):
         
     assert 1 <= zone_idx <= 3, 'zone_idx must be in [1, 2, 3]'
     
-    key = f'/measurement/sample/QNW_Zone{zone_idx}_Temperature'
+    # key = f'/measurement/sample/QNW_Zone{zone_idx}_Temperature'
+    key = f"/entry/sample/qnw{zone_idx}_temperature"
         
     try:
         with h5py.File(fname) as f:
@@ -304,8 +310,8 @@ def process_group(group='B039',
         data_dict = read_keys_from_files(flist, keys=keys)
         axf = XF(flist[0])
         t_el = axf.t_el
-        ql_dyn = axf.ql_dyn
-        ql_sta = axf.ql_sta
+        ql_dyn = axf.dqlist
+        ql_sta = axf.sqlist
         data_dict['temperature'] = temperature_list
         
         return data_dict, t_el, ql_dyn, ql_sta
@@ -339,8 +345,8 @@ def process_group(group='B039',
     # get additonal field for plotting
     axf = XF(flist[0])
     t_el = axf.t_el
-    ql_dyn = axf.ql_dyn
-    ql_sta = axf.ql_sta
+    ql_dyn = axf.dqlist
+    ql_sta = axf.sqlist
     return avg_all, t_el, ql_dyn, ql_sta
 
 
