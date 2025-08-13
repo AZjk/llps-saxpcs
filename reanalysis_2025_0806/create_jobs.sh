@@ -2,7 +2,6 @@
 
 BOOST_CORR=boost_corr_bin
 QUEUE_DIR="/home/beams/8IDIUSER/.simple_gpu_scheduler/queue"
-mkdir -p "$QUEUE_DIR"
 
 # ==== Dataset Configuration ====
 declare -A QMAPS
