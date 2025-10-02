@@ -13,7 +13,8 @@ def preprocess_data(avg_data_list, ql_sta):
     cleaned_data_list = []
     cleaned_ql_sta = []
 
-    for curve in avg_data_list[0:-1]:
+    # for curve in avg_data_list[0:-1]:
+    for curve in avg_data_list[:]:
         q = ql_sta
         i = curve['saxs_1d']
         
@@ -74,10 +75,10 @@ def iterative_scaling(avg_data_list, ql_sta_cleaned):
     scaled_curves[0,0,:] = ref_x
     scaled_curves[0,1,:] = ref_y
     
-    for i in range(1, len(avg_data_list)):  # Start from the second curve
+    for i in range(1, len(avg_data_list)): # Start the overlapping from the second curve
         target_x = ql_sta_cleaned[i]
         target_y = avg_data_list[i] # Changed to get the array directly
-
+        print(f"Working on dataset {i}")
         # Set dynamic q_scale range based on curve index
         if i <= 4:  # Curves 1–4
             q_scale_range = np.arange(0.5, 2.0, 0.01)
@@ -87,6 +88,8 @@ def iterative_scaling(avg_data_list, ql_sta_cleaned):
             q_scale_range = np.arange(5.5, 7.0, 0.01)
         elif i == 8:  # Curve 8
             q_scale_range = np.arange(9.5, 11.0, 0.01)
+        elif i == 9:  # Curve 9
+            q_scale_range = np.arange(11.0, 13.5, 0.01)
         else:
             raise ValueError(f"Unexpected curve index: {i}")
 
@@ -229,7 +232,7 @@ def optimize_T0_log(temperatures, x_values, x_errors, initial_delta=1.0, num_sam
 
 # lorentzian fit where b is fixed
 def lorentzian_fit_fix_b(q, Iq0, xi):
-    b = 1.7657 # used to be 1.7815 before
+    b = 1.6782
     return Iq0 / (1 + (xi * q)**b)
 
 # lorentzian fit with b
