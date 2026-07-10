@@ -135,7 +135,11 @@ def average_datasets(flist=None, data_dict=None, mask=None):
 
 def apply_cross_corr_threshold(x0, percentile=5, style='linear', debug_fig_ax=None,
                                label='debug'):
-    x = x0 
+    # Work on a copy: this routine rewrites NaNs and non-positive values (e.g.
+    # x[x <= 0] = 1 below) purely to make the correlation metric well-defined.
+    # If we mutated x0 in place it would corrupt data_dict, and those injected
+    # 1.0's would later be averaged into saxs_1d as huge single-q spikes.
+    x = np.array(x0, dtype=np.float64)
     x[np.isnan(x)] = 0
     if style == 'log':
         x[np.isnan(x)] = 1

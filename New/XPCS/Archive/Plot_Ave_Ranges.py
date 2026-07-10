@@ -1,11 +1,10 @@
 import sys
 import os
+import glob
 import numpy as np
+import h5py
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from common.utils import process_group_by_range
 
 # --- PARAMETERS ---
 group = 'B0147'
@@ -37,11 +36,28 @@ p0     = [1e-3, 0.5, 100.0, 1.0]
 bounds = ([1e-6, 0.0, 1.0, 0.98], [10.0, 1.0, 10000.0, 1.05])
 
 # --- LOAD DATA ---
-avg_all, t_el, ql_dyn, ql_sta = process_group_by_range(
-    group=group,
-    prefix=prefix,
-    file_ranges=file_ranges,
-)
+# Read the averaged HDF files produced by Average_Ranges.py (one per range).
+def _load_average(start, end):
+    """Load g2/g2_err and the delay/q axes from an averaged range file."""
+    pattern = os.path.join(prefix, f'{group}*_Average_{start:05d}_{end:05d}_results.hdf')
+    matches = sorted(glob.glob(pattern))
+    assert matches, f'no averaged file found for range ({start}, {end}); run Average_Ranges.py first'
+    with h5py.File(matches[0], 'r') as hf:
+        t0 = float(np.asarray(hf['/entry/instrument/detector_1/frame_time'][()]).flat[0])
+        delay_list = hf['/xpcs/multitau/delay_list'][()]
+        tau = (delay_list[:, 0] if delay_list.ndim > 1 else delay_list) * t0
+        g2 = hf['/xpcs/multitau/normalized_g2'][()]
+        g2_err = hf['/xpcs/multitau/normalized_g2_err'][()]
+        q_vals = hf['/xpcs/qmap/dynamic_v_list_dim0'][()]
+    return {'g2': g2, 'g2_err': g2_err}, tau, q_vals
+
+avg_all = []
+t_el = ql_dyn = None
+for start, end in file_ranges:
+    avg_dict, tau, q_vals = _load_average(start, end)
+    if t_el is None:
+        t_el, ql_dyn = tau, q_vals
+    avg_all.append(avg_dict)
 
 # --- FIT ---
 f_results = {idx: [] for idx in q_indices}
