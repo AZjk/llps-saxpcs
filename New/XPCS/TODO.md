@@ -1,0 +1,3 @@
+1. Modify the csv file writer so that the file name does not show up for every line;
+2. Modify the plotting code so that it plots a certain range of files for SAXS (with background subtraction and conversion to absolute cross-section), as well as plots and fits a certain range of files for XPCS. Generate a double column figure for SAXS, XPCS and fitting results.
+3. Add another code that plots the XPCS results for the other 4 ROIs. This is for the SI.

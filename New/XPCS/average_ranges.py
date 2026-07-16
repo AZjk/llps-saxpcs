@@ -1,18 +1,21 @@
 """Average XPCS results over explicit frame-number ranges.
 
+The groups (file-name headers) and their frame ranges are set inline in
+``FILE_RANGES`` below.
+
 For each range this script:
   * globs the group's result files and selects those whose frame number is in
     the range,
   * removes outliers (cross-correlation threshold on g2, g2_err, saxs_1d),
   * averages g2, g2_err and saxs_1d over the surviving files,
-  * writes the averaged data back into a new HDF file that keeps the same
-    structure as the originals (a copy of the first file in the range is used as
-    the template), in the same directory as the originals.
+  * writes the averaged data into a new HDF file that keeps the same structure
+    as the originals (a copy of the first file in the range is used as the
+    template), inside an ``average`` folder one level above ``reprocess_results``.
 
-The averaged file name carries 'Average' and the frame range so it is easy to
-tell apart from the raw files, e.g.::
+The averaged file name starts with 'Average_' and carries the frame range so it
+is easy to tell apart from the raw files, e.g.::
 
-    B0147_S3_7_300C10p_att00_Rq0_Average_00950_01050_results.hdf
+    Average_B0147_S3_7_300C10p_att00_Rq0_00950_01050_results.hdf
 
 In the averaged file:
   * ``/entry/start_time`` is set to the acquisition time of the first file in
@@ -36,15 +39,30 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from common.utils import outlier_removal, average_datasets
 
 # --- PARAMETERS ---
-group = 'B0147'
 prefix = '/home/8-id-i/2022-1/babnigg202203_nexus/reprocess_results'
 
-file_ranges = [
-    (950,  1050),
-    (1051, 1150),
-    (1151, 1250),
-    (1251, 1313),
-]
+# Groups to average: file-name header -> list of (start, end) frame ranges
+# (inclusive), one averaged file per range.  Usually one range per group.
+
+FILE_RANGES = {
+    'B0147': [(1, 200),
+        (200, 350),
+        (351, 500),
+        (501, 650),
+        (651, 800),
+        (801, 950),
+        (951, 1050),
+        (1051, 1150),
+        (1151, 1250),
+        (1251, 1313)],
+    'B0146': [(1, 50)],
+    'D0138': [(1, 50)],
+}
+
+
+# Averaged files are written here: an 'average' folder one level above the
+# reprocess_results directory (created if it does not already exist).
+out_dir = os.path.join(os.path.dirname(prefix.rstrip('/')), 'average')
 
 # Time list used to recover the acquisition time of each raw dataset.
 timelist_path = '/home/beams/8IDIUSER/Documents/llps-saxpcs/timelist_2022-1.txt'
@@ -147,26 +165,26 @@ def save_average(template, out_path, avg_dict, start_time, included_files):
         )
 
 
-def main():
+def process_group(group, file_ranges, timelist):
+    """Average every frame range for a single group and write the output files."""
     flist_all = sorted(glob.glob(os.path.join(prefix, f'{group}*_results.hdf')))
+    # ignore any previously produced averaged files (new 'Average_...' names as
+    # well as older '..._Average_...' ones)
+    flist_all = [f for f in flist_all if 'Average' not in os.path.basename(f)]
     assert flist_all, f'no dataset found in {prefix} for group {group}'
-    # ignore any previously produced averaged files
-    flist_all = [f for f in flist_all if '_Average_' not in os.path.basename(f)]
     frame_numbers = np.array([extract_frame(f) for f in flist_all])
 
-    timelist = load_timelist(timelist_path)
-
-    print(f'{group}: {len(flist_all)} raw files in {prefix}')
+    print(f'\n=== {group}: {len(flist_all)} raw files in {prefix} ===')
     for start, end in file_ranges:
         sel = (frame_numbers >= start) & (frame_numbers <= end)
         section_files = [f for f, m in zip(flist_all, sel) if m]
-        assert section_files, f'no files found for range ({start}, {end})'
+        assert section_files, f'no files found for {group} range ({start}, {end})'
 
         label = f'{group}_{start:05d}_{end:05d}'
         print(f'\nrange {start}-{end}: {len(section_files)} files')
 
         data_dict, read_files = read_range_data(section_files)
-        assert read_files, f'no readable files for range ({start}, {end})'
+        assert read_files, f'no readable files for {group} range ({start}, {end})'
 
         mask = outlier_removal(data_dict, label=label, percentile=percentile)
         included_files = [f for f, keep in zip(read_files, mask) if keep]
@@ -180,15 +198,26 @@ def main():
             print(f'  WARNING: no time list entry for {os.path.basename(section_files[0])}')
 
         template = section_files[0]
-        out_name = re.sub(
+        # replace the single frame number with the range, then prepend 'Average_'
+        core = re.sub(
             r'_(\d+)_results\.hdf$',
-            f'_Average_{start:05d}_{end:05d}_results.hdf',
+            f'_{start:05d}_{end:05d}_results.hdf',
             os.path.basename(template),
         )
-        out_path = os.path.join(prefix, out_name)
+        out_name = f'Average_{core}'
+        out_path = os.path.join(out_dir, out_name)
 
         save_average(template, out_path, avg_dict, start_time, included_files)
         print(f'  saved -> {out_name}  (start_time={start_time})')
+
+
+def main():
+    os.makedirs(out_dir, exist_ok=True)
+    timelist = load_timelist(timelist_path)
+
+    print(f'output dir: {out_dir}')
+    for group, file_ranges in FILE_RANGES.items():
+        process_group(group, file_ranges, timelist)
 
 
 if __name__ == '__main__':
