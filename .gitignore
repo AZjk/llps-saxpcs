@@ -163,11 +163,8 @@ cython_debug/
 # additional files not required for source control
 *.png
 *.jpg
-*.pdf
 *.npz
 *.db
 *.tif
-*.h5
-*.hdf
 
 
